@@ -2,17 +2,18 @@
 // Created by lucas.lima on 30/11/2025.
 //
 
-
 #include <Constants.h>
 #include "JsonParser.h"
 
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include <stdexcept>
 
 using json = nlohmann::json;
 
 namespace oriongl::samples::solar_system {
     void from_json(const json &j, solar_system::CorpData &c) {
+        c.name = j.value("name", "unnamed");
         c.rotationScaler = j.value("rotation_speed", 1.0f);
         c.translationScaler = j.value("translation_speed", 1.0f);
         c.radius = j.value("radius", 1.0f);
@@ -21,18 +22,22 @@ namespace oriongl::samples::solar_system {
             c.defines = j["defines"].get<std::vector<std::string>>();
 
         if (j.contains("textures") && j["textures"].is_array()) {
-            auto &tex = j["textures"];
-
-            if (tex.size() > 0) c.mat.diffusePath = utils::constants::ASSETS_PATH + tex[0].get<std::string>();
-            if (tex.size() > 1) c.mat.specularPath = utils::constants::ASSETS_PATH + tex[1].get<std::string>();
-            if (tex.size() > 2) c.mat.emissivePath = utils::constants::ASSETS_PATH + tex[2].get<std::string>();
+            for (const auto &tex : j["textures"]) {
+                c.textures.push_back(utils::constants::ASSETS_PATH + tex.get<std::string>());
+            }
         }
 
-        if (j.at("position").size() != 3) throw std::runtime_error("Corrupted json file");
-        c.pos = j.at("position").get<std::array<float, 3> >();
+        if (c.textures.size() == 1) {
+            c.textures.push_back(utils::constants::TEXTURE_BLACK_FALLBACK);
+        }
+
+        if (j.contains("position") && j.at("position").size() == 3) {
+            c.pos = j.at("position").get<std::array<float, 3>>();
+        } else {
+            c.pos = {0.0f, 0.0f, 0.0f};
+        }
     }
 }
-
 
 namespace oriongl::samples::utils {
     JsonParser::system_data JsonParser::readSystemData() {
@@ -40,6 +45,10 @@ namespace oriongl::samples::utils {
         stars_data stars;
 
         std::ifstream input_file{constants::CORPS_DATA, std::ios::in};
+        if (!input_file.is_open()) {
+            throw std::runtime_error("Could not open solar system data file: " + constants::CORPS_DATA);
+        }
+
         json parsed_json = json::parse(input_file);
 
         for (auto &planet_json: parsed_json.at("planets")) {
@@ -53,3 +62,4 @@ namespace oriongl::samples::utils {
         return std::make_pair(std::move(planets), std::move(stars));
     };
 }
+

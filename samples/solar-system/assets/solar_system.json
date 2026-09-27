@@ -20,7 +20,7 @@
       "name": "earth",
       "textures": [
         "earth.jpg",
-        "earth_specular_map.tif",
+        "earth_specular_map.png",
         "earth_nightmap.jpg"
       ],
       "defines":  [
