@@ -31,7 +31,34 @@ void Shader::compileShader() const {
     glCompileShader(ID);
 }
 
-Shader::~Shader() { glDeleteShader(this->ID); }
+Shader::~Shader() {
+    if (this->ID != 0) {
+        glDeleteShader(this->ID);
+        this->ID = 0;
+    }
+}
+
+Shader::Shader(Shader &&other) noexcept
+    : shaderSource(std::move(other.shaderSource)),
+      defines(std::move(other.defines)),
+      shaderType(other.shaderType),
+      ID(other.ID) {
+    other.ID = 0;
+}
+
+Shader &Shader::operator=(Shader &&other) noexcept {
+    if (this != &other) {
+        if (this->ID != 0) {
+            glDeleteShader(this->ID);
+        }
+        shaderSource = std::move(other.shaderSource);
+        defines = std::move(other.defines);
+        shaderType = other.shaderType;
+        ID = other.ID;
+        other.ID = 0;
+    }
+    return *this;
+}
 
 std::string Shader::getSource() { return shaderSource; }
 
@@ -44,6 +71,7 @@ void Shader::getErrors() {
     if (!success) {
         glGetShaderInfoLog(ID, 512, NULL, infoLog);
         glDeleteShader(ID);
+        ID = 0;
         throw std::runtime_error{infoLog};
     }
 }

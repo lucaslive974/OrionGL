@@ -38,4 +38,29 @@ TEST(MeshTest, correct_index_size) {
     EXPECT_EQ(mesh.getIndexSize(), 3);
 }
 
+TEST(MeshTest, mesh_raii_destructor_deletes_vao) {
+    unsigned int vao = 0;
+    {
+        Mesh mesh{vertexes, indexes};
+        vao = mesh.getVAO();
+        EXPECT_TRUE(glIsVertexArray(vao));
+    }
+    EXPECT_FALSE(glIsVertexArray(vao));
+}
+
+TEST(MeshTest, mesh_move_semantics) {
+    unsigned int vao = 0;
+    {
+        Mesh mesh1{vertexes, indexes};
+        vao = mesh1.getVAO();
+        EXPECT_TRUE(glIsVertexArray(vao));
+
+        Mesh mesh2 = std::move(mesh1);
+        EXPECT_EQ(mesh1.getVAO(), 0);
+        EXPECT_EQ(mesh2.getVAO(), vao);
+        EXPECT_TRUE(glIsVertexArray(vao));
+    }
+    EXPECT_FALSE(glIsVertexArray(vao));
+}
+
 } // namespace oriongl::graphics

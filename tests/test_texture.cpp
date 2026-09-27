@@ -30,4 +30,19 @@ TEST(TextureTest, inexistent_texture_file_must_throw) {
     EXPECT_ANY_THROW(({ Texture tex{"Inexistent_texture_path"}; }));
 }
 
+TEST(TextureTest, texture_raii_and_move) {
+    unsigned int tex_id = 0;
+    {
+        Texture t1{DUMMY_TEXTURE_PATH};
+        tex_id = t1.getTex();
+        EXPECT_TRUE(glIsTexture(tex_id));
+
+        Texture t2 = std::move(t1);
+        EXPECT_EQ(t1.getTex(), 0);
+        EXPECT_EQ(t2.getTex(), tex_id);
+        EXPECT_TRUE(glIsTexture(tex_id));
+    }
+    EXPECT_FALSE(glIsTexture(tex_id));
+}
+
 } // namespace oriongl::graphics

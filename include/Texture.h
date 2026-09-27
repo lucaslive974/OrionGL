@@ -2,14 +2,21 @@
 #include <string>
 
 namespace oriongl::graphics {
-    class Texture {
-        unsigned int TEX = 0;
+class Texture {
+    unsigned int TEX = 0;
 
-    public:
-        Texture(std::string texture);
+  public:
+    Texture(std::string texture);
+    Texture(std::string texture, bool flip);
+    ~Texture();
 
-        Texture(std::string texture, bool flip);
+    Texture(const Texture &) = delete;
+    Texture &operator=(const Texture &) = delete;
 
-        unsigned int getTex() const;
-    };
-}
+    Texture(Texture &&other) noexcept;
+    Texture &operator=(Texture &&other) noexcept;
+
+    unsigned int getTex() const;
+};
+} // namespace oriongl::graphics
+

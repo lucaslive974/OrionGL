@@ -26,7 +26,14 @@ class Mesh {
 
     unsigned int getVertexSize() const;
   public:
-    Mesh(vertex_array &vertexes, indexes_array &indexes);
+    Mesh(const vertex_array &vertexes, const indexes_array &indexes);
+    ~Mesh();
+
+    Mesh(const Mesh &) = delete;
+    Mesh &operator=(const Mesh &) = delete;
+
+    Mesh(Mesh &&other) noexcept;
+    Mesh &operator=(Mesh &&other) noexcept;
 
     unsigned int getVAO() const;
     unsigned int getIndexSize() const;

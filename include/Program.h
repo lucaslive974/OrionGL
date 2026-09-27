@@ -14,6 +14,13 @@ class Program {
 
   public:
     Program(std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> fragment);
+    ~Program();
+
+    Program(const Program &) = delete;
+    Program &operator=(const Program &) = delete;
+
+    Program(Program &&other) noexcept;
+    Program &operator=(Program &&other) noexcept;
 
     Program &scale(glm::vec3 scaleProps);
 

@@ -23,11 +23,18 @@ class Shader {
     std::string shaderSource;
     std::vector<std::string> defines;
     ShaderType shaderType;
-    unsigned int ID;
+    unsigned int ID = 0;
 
   public:
     Shader(ShaderType type, std::string src_raw, const std::vector<std::string> &defines = {});
     ~Shader();
+
+    Shader(const Shader &) = delete;
+    Shader &operator=(const Shader &) = delete;
+
+    Shader(Shader &&other) noexcept;
+    Shader &operator=(Shader &&other) noexcept;
+
     void injectDefines();
     void compileShader() const;
     [[nodiscard]] unsigned int getId() const;

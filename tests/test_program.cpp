@@ -32,8 +32,19 @@ TEST_F(ProgramTest, create_and_link) {
     EXPECT_TRUE(glIsProgram(program.getId()));
 };
 
-// TEST_F(ProgramTest, wrong_type_shaders_must_throw_on_linkage) {
-//     EXPECT_ANY_THROW(({ Program program{wrong_type_vertex_shader, wrong_type_fragment_shader}; }));
-// }
+TEST_F(ProgramTest, program_raii_and_move) {
+    unsigned int id = 0;
+    {
+        Program p1{vertex_shader, fragment_shader};
+        id = p1.getId();
+        EXPECT_TRUE(glIsProgram(id));
+
+        Program p2 = std::move(p1);
+        EXPECT_EQ(p1.getId(), 0);
+        EXPECT_EQ(p2.getId(), id);
+        EXPECT_TRUE(glIsProgram(id));
+    }
+    EXPECT_FALSE(glIsProgram(id));
+}
 
 } // namespace oriongl::graphics

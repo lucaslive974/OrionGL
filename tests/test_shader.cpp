@@ -50,4 +50,29 @@ TEST(ShaderTest, invalid_shader_must_throw) {
     EXPECT_ANY_THROW(({ Shader wrong_shader_type{ShaderType::FRAGMENT, vertex_src}; }));
 }
 
+TEST(ShaderTest, shader_raii_destructor_deletes_shader) {
+    unsigned int id = 0;
+    {
+        Shader shader{ShaderType::VERTEX, vertex_src};
+        id = shader.getId();
+        EXPECT_TRUE(glIsShader(id));
+    }
+    EXPECT_FALSE(glIsShader(id));
+}
+
+TEST(ShaderTest, shader_move_semantics) {
+    unsigned int id = 0;
+    {
+        Shader s1{ShaderType::VERTEX, vertex_src};
+        id = s1.getId();
+        EXPECT_TRUE(glIsShader(id));
+
+        Shader s2 = std::move(s1);
+        EXPECT_EQ(s1.getId(), 0);
+        EXPECT_EQ(s2.getId(), id);
+        EXPECT_TRUE(glIsShader(id));
+    }
+    EXPECT_FALSE(glIsShader(id));
+}
+
 } // namespace oriongl::graphics

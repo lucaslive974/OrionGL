@@ -22,6 +22,31 @@ Program::Program(std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> fragmen
     errors();
 }
 
+Program::~Program() {
+    if (ID != 0) {
+        glDeleteProgram(ID);
+        ID = 0;
+    }
+}
+
+Program::Program(Program &&other) noexcept : model(other.model), ID(other.ID) {
+    other.ID = 0;
+    other.model = glm::mat4(1.0f);
+}
+
+Program &Program::operator=(Program &&other) noexcept {
+    if (this != &other) {
+        if (ID != 0) {
+            glDeleteProgram(ID);
+        }
+        model = other.model;
+        ID = other.ID;
+        other.ID = 0;
+        other.model = glm::mat4(1.0f);
+    }
+    return *this;
+}
+
 void Program::errors() {
     int success = 0;
     char infoLog[512];
@@ -30,6 +55,7 @@ void Program::errors() {
     if (!success) {
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
         glDeleteProgram(ID);
+        ID = 0;
         throw std::runtime_error{infoLog};
     }
 }
