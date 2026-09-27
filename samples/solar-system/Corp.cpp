@@ -1,5 +1,4 @@
 #include "Corp.h"
-#include <GLFW/glfw3.h>
 #include <cmath>
 
 namespace oriongl::samples::solar_system {
@@ -23,25 +22,15 @@ Corp::Corp(std::shared_ptr<graphics::Program> program,
     }
 }
 
-void Corp::draw() {
-    float time = static_cast<float>(glfwGetTime());
-    glm::vec3 currentPos;
-
+void Corp::update(core::Transform &transform, float totalTime) {
     if (isStar || orbitRadius < 0.001f) {
-        currentPos = initialPos;
+        transform.position = initialPos;
     } else {
-        float angle = initialPhase + time * translationScaler;
-        currentPos = glm::vec3(std::cos(angle) * orbitRadius, initialPos.y, std::sin(angle) * orbitRadius);
+        float angle = initialPhase + totalTime * translationScaler;
+        transform.position = glm::vec3(std::cos(angle) * orbitRadius, initialPos.y, std::sin(angle) * orbitRadius);
     }
 
-    float rotAngle = glm::mod(time * rotationScaler * 20.0f, 360.0f);
-
-    program->resetModelMatrix();
-    program->translate(currentPos);
-    program->rotate(rotAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-    program->setModelMatrix();
-
-    Model::draw();
+    transform.rotation.y = std::fmod(totalTime * rotationScaler * 20.0f, 360.0f);
 }
 } // namespace oriongl::samples::solar_system
 

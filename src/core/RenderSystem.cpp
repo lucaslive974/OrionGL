@@ -9,32 +9,25 @@ namespace oriongl::core {
 RenderSystem::RenderSystem() {}
 
 void RenderSystem::render(Scene &scene) {
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto &lights = scene.lights;
-    auto &camera = scene.camera;
+  auto &lights = scene.lights;
+  for (auto &entitie : scene.entities) {
 
-    camera.processCommands();
+    auto &instances = entitie.instances;
+    auto &model = entitie.model;
 
-    for (auto &entitie : scene.entities) {
+    auto shader = model->getModelProgram();
 
-        auto &instances = entitie.instances;
-        auto &model = entitie.model;
+    shader->use();
+    shader->setCamera(scene.camera);
+    shader->setLights(lights);
 
-        auto shader = model->getModelProgram();
-
-        shader->use();
-        shader->setCamera(camera);
-        shader->setLights(lights);
-
-        for (auto &instance : instances) {
-            shader->resetModelMatrix();
-            shader->translate(instance);
-            shader->setModelMatrix();
-
-            model->draw();
-        };
-    }
+    for (auto &instance : instances) {
+      shader->setUniform4fm("model", instance.getMatrix());
+      model->draw();
+    };
+  }
 }
 } // namespace oriongl::core

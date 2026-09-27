@@ -64,7 +64,7 @@ public:
   const GLFWvidmode *vidmode = nullptr;
 
   int width = 1280;
-  float deltaTime = 0;
+  float deltaTime = 0.016f;
   float lastFrame = 0;
 
   // Glad configuration;
@@ -148,6 +148,12 @@ void WindowSystem::closeWindow() { glfwTerminate(); }
 
 void WindowSystem::setTitle(const char *title) {
   glfwSetWindowTitle(impl->window, title);
+}
+
+float WindowSystem::getDeltaTime() const { return impl->deltaTime; }
+
+float WindowSystem::getTotalTime() const {
+  return static_cast<float>(glfwGetTime());
 }
 
 } // namespace oriongl::core

@@ -49,7 +49,7 @@ int main() {
 
     oriongl::core::Entity cube_ent;
     cube_ent.model = cube_model;
-    cube_ent.instances = cube_positions;
+    cube_ent.instances.assign(cube_positions.begin(), cube_positions.end());
 
     auto light_program = resource_system.createShader(vertex_shader, frag_light_shader, {});
     auto sphere_mesh = resource_system.createSphereMesh(5.0f);

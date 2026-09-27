@@ -4,12 +4,13 @@
 #include <vector>
 
 #include "Model.h"
+#include "Transform.h"
 
 namespace oriongl::core {
 
 struct Entity {
-    std::shared_ptr<graphics::Model> model;
-    std::vector<glm::vec3> instances;
+  std::shared_ptr<graphics::Model> model;
+  std::vector<Transform> instances;
 };
 
 } // namespace oriongl::core

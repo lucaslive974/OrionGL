@@ -1,5 +1,6 @@
 #pragma once
 #include <Model.h>
+#include <Transform.h>
 #include <array>
 #include <string>
 #include <vector>
@@ -32,7 +33,8 @@ namespace oriongl::samples::solar_system {
              const CorpData &data,
              bool is_star = false);
 
-        void draw() override;
+        void update(core::Transform &transform, float totalTime);
     };
 }
+
 

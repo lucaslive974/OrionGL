@@ -30,6 +30,12 @@ int main() {
 
     oriongl::core::Scene scene;
 
+    struct CorpEntityRef {
+        std::shared_ptr<oriongl::samples::solar_system::Corp> corp;
+        size_t entityIndex;
+    };
+    std::vector<CorpEntityRef> corps;
+
     // Load Stars (Sun) using emissive light shader
     for (const auto &star : stars_data) {
         auto mesh = resource_system.createSphereMesh(star.radius);
@@ -41,6 +47,7 @@ int main() {
         star_entity.model = star_model;
         star_entity.instances = {glm::vec3(0.0f)};
 
+        corps.push_back({star_model, scene.entities.size()});
         scene.entities.push_back(star_entity);
     }
 
@@ -55,6 +62,7 @@ int main() {
         planet_entity.model = planet_model;
         planet_entity.instances = {glm::vec3(0.0f)};
 
+        corps.push_back({planet_model, scene.entities.size()});
         scene.entities.push_back(planet_entity);
     }
 
@@ -76,6 +84,15 @@ int main() {
     scene.camera.getViewPosition() = glm::vec3(0.0f, 150.0f, 350.0f);
 
     engine.setScene(scene);
+
+    engine.setUpdateCallback([corps](oriongl::core::Scene &sc, float /*dt*/, float totalTime) {
+        for (const auto &ref : corps) {
+            if (ref.entityIndex < sc.entities.size() && !sc.entities[ref.entityIndex].instances.empty()) {
+                ref.corp->update(sc.entities[ref.entityIndex].instances[0], totalTime);
+            }
+        }
+    });
+
     engine.run();
 
     return 0;
