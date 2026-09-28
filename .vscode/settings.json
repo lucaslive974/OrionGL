@@ -1,5 +1,0 @@
-{
-    "cmake.configureArgs": [
-        "-DCOMPILE_SAMPLES=ON"
-    ]
-}

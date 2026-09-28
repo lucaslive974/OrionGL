@@ -362,7 +362,10 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Clion
+# IDE
+.cache
+.vscode
+.idea
 
-# cmake
+# Build directories
 build/
