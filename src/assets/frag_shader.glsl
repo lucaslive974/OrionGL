@@ -60,15 +60,15 @@ void main()
   vec3 normalVector = normalize(NormalPos);
   vec3 viewVector = normalize(viewPos - FragPos);
 
-  vec3 output = calcAmbientColor(vec3(textel1));
+  vec3 pixel = calcAmbientColor(vec3(textel1));
 
   if(hasDirectional)
-    output += calcDirectionalLight(normalVector, viewVector, vec3(textel1), vec3(textel2));
+    pixel += calcDirectionalLight(normalVector, viewVector, vec3(textel1), vec3(textel2));
 
   for(int i = 0; i < nPointLights; i++) 
-    output += calcPointLight(pointLights[i], normalVector, viewVector, vec3(textel1), vec3(textel2));
+    pixel += calcPointLight(pointLights[i], normalVector, viewVector, vec3(textel1), vec3(textel2));
 
-  FragColor = vec4(output, textel1.a);
+  FragColor = vec4(pixel, textel1.a);
 }
 
 float calcAttenuation(Light light) {
