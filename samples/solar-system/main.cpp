@@ -1,32 +1,32 @@
+#include "Corp.h"
+#include "JsonParser.h"
 #include <Engine.h>
 #include <Entity.h>
 #include <Light.h>
 #include <ResourceSystem.h>
 #include <Scene.h>
-#include "Corp.h"
-#include "JsonParser.h"
 #include <memory>
 #include <vector>
 
-const char vertex_shader[] = {
+const char vertexShader[] = {
 #embed "../../src/assets/vertex_shader.glsl"
     , '\0'};
 
-const char frag_shader[] = {
+const char fragShader[] = {
 #embed "../../src/assets/frag_shader.glsl"
     , '\0'};
 
-const char frag_light_shader[] = {
+const char fragLightShader[] = {
 #embed "../../src/assets/frag_light_shader.glsl"
     , '\0'};
 
 int main() {
     oriongl::Engine engine;
-    oriongl::core::ResourceSystem resource_system;
+    oriongl::core::ResourceSystem resourceSystem;
 
-    auto system_data = oriongl::samples::utils::JsonParser::readSystemData();
-    auto &planets_data = system_data.first;
-    auto &stars_data = system_data.second;
+    auto systemData = oriongl::samples::utils::JsonParser::readSystemData();
+    auto &planetsData = systemData.first;
+    auto &starsData = systemData.second;
 
     oriongl::core::Scene scene;
 
@@ -37,51 +37,47 @@ int main() {
     std::vector<CorpEntityRef> corps;
 
     // Load Stars (Sun) using emissive light shader
-    for (const auto &star : stars_data) {
-        auto mesh = resource_system.createSphereMesh(star.radius);
-        auto mat = resource_system.createMaterial(star.textures);
-        auto program = resource_system.createShader(vertex_shader, frag_light_shader, star.defines);
+    for (const auto &star : starsData) {
+        auto mesh = resourceSystem.createSphereMesh(star.radius);
+        auto mat = resourceSystem.createMaterial(star.textures);
+        auto program = resourceSystem.createShader(vertexShader, fragLightShader, star.defines);
 
-        auto star_model = std::make_shared<oriongl::samples::solar_system::Corp>(program, mesh, mat, star, true);
-        oriongl::core::Entity star_entity;
-        star_entity.model = star_model;
-        star_entity.instances = {glm::vec3(0.0f)};
+        auto starModel = std::make_shared<oriongl::samples::solar_system::Corp>(program, mesh, mat, star, true);
+        oriongl::core::Entity starEntity;
+        starEntity.model = starModel;
+        starEntity.instances = {glm::vec3(0.0F)};
 
-        corps.push_back({star_model, scene.entities.size()});
-        scene.entities.push_back(star_entity);
+        corps.push_back({.corp = starModel, .entityIndex = scene.entities.size()});
+        scene.entities.push_back(starEntity);
     }
 
     // Load Planets using lit shader
-    for (const auto &planet : planets_data) {
-        auto mesh = resource_system.createSphereMesh(planet.radius);
-        auto mat = resource_system.createMaterial(planet.textures);
-        auto program = resource_system.createShader(vertex_shader, frag_shader, planet.defines);
+    for (const auto &planet : planetsData) {
+        auto mesh = resourceSystem.createSphereMesh(planet.radius);
+        auto mat = resourceSystem.createMaterial(planet.textures);
+        auto program = resourceSystem.createShader(vertexShader, fragShader, planet.defines);
 
-        auto planet_model = std::make_shared<oriongl::samples::solar_system::Corp>(program, mesh, mat, planet, false);
-        oriongl::core::Entity planet_entity;
-        planet_entity.model = planet_model;
-        planet_entity.instances = {glm::vec3(0.0f)};
+        auto planetModel = std::make_shared<oriongl::samples::solar_system::Corp>(program, mesh, mat, planet, false);
+        oriongl::core::Entity planetEntity;
+        planetEntity.model = planetModel;
+        planetEntity.instances = {glm::vec3(0.0F)};
 
-        corps.push_back({planet_model, scene.entities.size()});
-        scene.entities.push_back(planet_entity);
+        corps.push_back({.corp = planetModel, .entityIndex = scene.entities.size()});
+        scene.entities.push_back(planetEntity);
     }
 
     // Configure central point light located at the Sun
-    std::vector<oriongl::graphics::PointLight> point_lights = {
-        {
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            oriongl::graphics::LightColor{1.0f, 0.98f, 0.92f},
-            oriongl::graphics::LightAttenuation{1.0f, 0.0001f, 0.000005f}
-        }
-    };
-    scene.lights = oriongl::core::Lighting{point_lights};
-    scene.lights.getLightScaling().ambient = 0.08f;
-    scene.lights.getLightScaling().diffuse = 0.9f;
-    scene.lights.getLightScaling().specular = 0.6f;
+    std::vector<oriongl::graphics::PointLight> pointLights = {
+        {glm::vec3(0.0F, 0.0F, 0.0F), oriongl::graphics::LightColor{1.0F, 0.98F, 0.92F},
+         oriongl::graphics::LightAttenuation{.constant = 1.0F, .linear = 0.0001F, .quadratic = 0.000005F}}};
+    scene.lights = oriongl::core::Lighting{pointLights};
+    scene.lights.getLightScaling().ambient = 0.08F;
+    scene.lights.getLightScaling().diffuse = 0.9F;
+    scene.lights.getLightScaling().specular = 0.6F;
 
     // Configure panoramic camera view
-    scene.camera = {45.0f, oriongl::ratio::FullHD, 0.5f, 4000.0f};
-    scene.camera.getViewPosition() = glm::vec3(0.0f, 150.0f, 350.0f);
+    scene.camera = {45.0F, oriongl::ratio::FullHD, 0.5F, 4000.0F};
+    scene.camera.getViewPosition() = glm::vec3(0.0F, 150.0F, 350.0F);
 
     engine.setScene(scene);
 
@@ -97,4 +93,3 @@ int main() {
 
     return 0;
 }
-

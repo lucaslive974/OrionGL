@@ -2,39 +2,39 @@
 #include <ResourceSystem.h>
 #include <Scene.h>
 
-const char vertex_shader[] = {
+const char vertexShader[] = {
 #embed "../../src/assets/vertex_shader.glsl"
     , '\0'};
 
-const char frag_shader[] = {
+const char fragShader[] = {
 #embed "../../src/assets/frag_shader.glsl"
     , '\0'};
 
-const char *backpack_src = "assets/survival_guitar_backpack/scene.gltf";
-const char *dark_knight_src = "assets/dark_knight/scene.gltf";
-const char *sea_keep_src = "assets/sea_keep/scene.gltf";
+const char *backpackSrc = "assets/survival_guitar_backpack/scene.gltf";
+const char *darkKnightSrc = "assets/dark_knight/scene.gltf";
+const char *seaKeepSrc = "assets/sea_keep/scene.gltf";
 
 int main() {
     oriongl::Engine engine;
-    oriongl::core::ResourceSystem resource_system;
+    oriongl::core::ResourceSystem resourceSystem;
 
-    auto program = resource_system.createShader(vertex_shader, frag_shader);
+    auto program = resourceSystem.createShader(vertexShader, fragShader);
 
-    auto sea_keep = resource_system.createModel("SEA_KEEP", program, sea_keep_src);
-    oriongl::core::Entity sea_keep_ent;
-    sea_keep_ent.model = sea_keep;
-    sea_keep_ent.instances.push_back({0.0f, -300.0f, -500.0f});
+    auto seaKeep = resourceSystem.createModel("SEA_KEEP", program, seaKeepSrc);
+    oriongl::core::Entity seaKeepEnt;
+    seaKeepEnt.model = seaKeep;
+    seaKeepEnt.instances.emplace_back(0.0F, -300.0F, -500.0F);
 
-    std::vector<oriongl::graphics::PointLight> point_light_positions = {
-        {{0.0f, 0.0f, 0.0f}, {0.7f, 0.7f, 1.0f}, {1.0f, 0.0f, 0.0f}},
+    std::vector<oriongl::graphics::PointLight> pointLightPositions = {
+        {{0.0F, 0.0F, 0.0F}, {0.7F, 0.7F, 1.0F}, {.constant = 1.0F, .linear = 0.0F, .quadratic = 0.0F}},
     };
 
-    oriongl::core::Lighting scene_lighting{point_light_positions};
+    oriongl::core::Lighting sceneLighting{pointLightPositions};
 
-    oriongl::core::Scene scene{.lights = scene_lighting};
-    scene.entities.push_back(sea_keep_ent);
+    oriongl::core::Scene scene{.lights = sceneLighting};
+    scene.entities.push_back(seaKeepEnt);
 
-    scene.camera = {45.0f, oriongl::ratio::FullHD, 0.1f, 3000.0f};
+    scene.camera = {45.0F, oriongl::ratio::FullHD, 0.1F, 3000.0F};
 
     engine.setScene(scene);
     engine.run();

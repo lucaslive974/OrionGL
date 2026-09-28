@@ -15,7 +15,7 @@ struct ModelData {
 
 class ModelLoader {
   public:
-    static ModelData loadFromFile(std::string src);
+    static ModelData loadFromFile(const std::string &src);
 };
 
 } // namespace oriongl::core

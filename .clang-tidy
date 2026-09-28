@@ -1,0 +1,18 @@
+# The Checks string is a comma-separated list of globs.
+# Prefixing a glob with '-' disables those checks.
+Checks: >
+  bugprone-*,
+  performance-*,
+  readability-*,
+  modernize-*,
+  -bugprone-easily-swappable-parameters,
+  -modernize-use-trailing-return-type,
+  -readability-magic-numbers,
+  -readability-braces-around-statements,
+  -readability-identifier-length,
+
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+
+CheckOptions:
+    readability-identifier-naming.VariableCase: camelBack

@@ -14,16 +14,16 @@
 
 namespace oriongl::graphics {
 
-typedef std::array<float, 3> MaterialColor;
+using MaterialColor = std::array<float, 3>;
 
 class Material {
     std::vector<std::shared_ptr<Texture>> textures;
-    MaterialColor _color = {1.0f, 1.0f, 1.0f};
+    MaterialColor _color = {1.0F, 1.0F, 1.0F};
 
   public:
     Material();
     void loadTexture(std::shared_ptr<Texture> texture);
-    void bindMaterial(std::shared_ptr<Program> prg);
+    void bindMaterial(const std::shared_ptr<Program> &prg);
     void setColor(MaterialColor color);
 };
 } // namespace oriongl::graphics

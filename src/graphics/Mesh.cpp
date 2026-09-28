@@ -11,26 +11,21 @@ Mesh::Mesh(const vertex_array &vertexes, const indexes_array &indexes) {
 }
 
 Mesh::~Mesh() {
-    if (EBO) {
+    if (EBO != 0U) {
         glDeleteBuffers(1, &EBO);
         EBO = 0;
     }
-    if (VBO) {
+    if (VBO != 0U) {
         glDeleteBuffers(1, &VBO);
         VBO = 0;
     }
-    if (VAO) {
+    if (VAO != 0U) {
         glDeleteVertexArrays(1, &VAO);
         VAO = 0;
     }
 }
 
-Mesh::Mesh(Mesh &&other) noexcept
-    : vertexesSize(other.vertexesSize),
-      indexesSize(other.indexesSize),
-      VAO(other.VAO),
-      VBO(other.VBO),
-      EBO(other.EBO) {
+Mesh::Mesh(Mesh &&other) noexcept : vertexesSize(other.vertexesSize), indexesSize(other.indexesSize), VAO(other.VAO), VBO(other.VBO), EBO(other.EBO) {
     other.vertexesSize = 0;
     other.indexesSize = 0;
     other.VAO = 0;
@@ -38,11 +33,14 @@ Mesh::Mesh(Mesh &&other) noexcept
     other.EBO = 0;
 }
 
-Mesh &Mesh::operator=(Mesh &&other) noexcept {
+auto Mesh::operator=(Mesh &&other) noexcept -> Mesh & {
     if (this != &other) {
-        if (EBO) glDeleteBuffers(1, &EBO);
-        if (VBO) glDeleteBuffers(1, &VBO);
-        if (VAO) glDeleteVertexArrays(1, &VAO);
+        if (EBO != 0U)
+            glDeleteBuffers(1, &EBO);
+        if (VBO != 0U)
+            glDeleteBuffers(1, &VBO);
+        if (VAO != 0U)
+            glDeleteVertexArrays(1, &VAO);
 
         vertexesSize = other.vertexesSize;
         indexesSize = other.indexesSize;
@@ -58,7 +56,6 @@ Mesh &Mesh::operator=(Mesh &&other) noexcept {
     }
     return *this;
 }
-
 
 void Mesh::genVertexBufferObject(const vertex_array &vertexes) {
     vertexesSize = vertexes.size();
@@ -87,24 +84,21 @@ void Mesh::bindBuffer() {
     static_assert(sizeof(Vertex::normal) == 12);
     static_assert(sizeof(Vertex::text_coords) == 8);
 
-    glVertexAttribPointer(0, sizeof(Vertex::position) / sizeof(float), GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                          (void *)offsetof(Vertex, position));
+    glVertexAttribPointer(0, sizeof(Vertex::position) / sizeof(float), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, position));
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, sizeof(Vertex::normal) / sizeof(float), GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                          (void *)offsetof(Vertex, normal));
+    glVertexAttribPointer(1, sizeof(Vertex::normal) / sizeof(float), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, normal));
     glEnableVertexAttribArray(1);
 
-    glVertexAttribPointer(2, sizeof(Vertex::text_coords) / sizeof(float), GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                          (void *)offsetof(Vertex, text_coords));
+    glVertexAttribPointer(2, sizeof(Vertex::text_coords) / sizeof(float), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, text_coords));
     glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);
 }
 
-unsigned int Mesh::getVAO() const { return VAO; }
+auto Mesh::getVAO() const -> unsigned int { return VAO; }
 
-unsigned int Mesh::getVertexSize() const { return vertexesSize; }
+auto Mesh::getVertexSize() const -> unsigned int { return vertexesSize; }
 
-unsigned int Mesh::getIndexSize() const { return indexesSize; }
+auto Mesh::getIndexSize() const -> unsigned int { return indexesSize; }
 } // namespace oriongl::graphics

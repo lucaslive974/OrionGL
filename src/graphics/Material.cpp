@@ -8,16 +8,16 @@
 
 namespace oriongl::graphics {
 
-constexpr const size_t MAX_TEXTURES_SUPPORT = 8;
+constexpr const size_t maxTexturesSupport = 8;
 
-Material::Material() {};
+Material::Material() = default;
 
 void Material::loadTexture(std::shared_ptr<oriongl::graphics::Texture> texture) {
-    assert(textures.size() < MAX_TEXTURES_SUPPORT && "Exceeded maximum number of textures per material");
+    assert(textures.size() < maxTexturesSupport && "Exceeded maximum number of textures per material");
     textures.push_back(std::move(texture));
 }
 
-void Material::bindMaterial(std::shared_ptr<Program> prg) {
+void Material::bindMaterial(const std::shared_ptr<Program> &prg) {
     size_t number = 0;
     for (auto &texture : textures) {
         glActiveTexture(GL_TEXTURE0 + number++);

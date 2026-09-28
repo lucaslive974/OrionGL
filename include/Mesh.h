@@ -1,15 +1,16 @@
 #pragma once
+#include <array>
 #include <vector>
 
 namespace oriongl::graphics {
 
-typedef std::vector<float> vertex_array;
-typedef std::vector<unsigned int> indexes_array;
+using vertex_array = std::vector<float>;
+using indexes_array = std::vector<unsigned int>;
 
 struct Vertex {
-    float position[3];
-    float normal[3];
-    float text_coords[2];
+    std::array<float, 3> position;
+    std::array<float, 3> normal;
+    std::array<float, 2> text_coords;
 };
 
 class Mesh {
@@ -22,9 +23,10 @@ class Mesh {
     void genVertexArrayBuffer();
     void genVertexBufferObject(const vertex_array &vertexes);
     void genElementBufferObject(const indexes_array &indexes);
-    void bindBuffer();
+    static void bindBuffer();
 
-    unsigned int getVertexSize() const;
+    [[nodiscard]] unsigned int getVertexSize() const;
+
   public:
     Mesh(const vertex_array &vertexes, const indexes_array &indexes);
     ~Mesh();
@@ -35,7 +37,7 @@ class Mesh {
     Mesh(Mesh &&other) noexcept;
     Mesh &operator=(Mesh &&other) noexcept;
 
-    unsigned int getVAO() const;
-    unsigned int getIndexSize() const;
+    [[nodiscard]] unsigned int getVAO() const;
+    [[nodiscard]] unsigned int getIndexSize() const;
 };
 } // namespace oriongl::graphics

@@ -1,13 +1,14 @@
 #include "Model.h"
 #include <cassert>
 #include <glad.h>
+#include <utility>
 
 namespace oriongl::graphics {
-Model::Model(std::shared_ptr<Program> program) : program(program) {}
+Model::Model(std::shared_ptr<Program> program) : program(std::move(std::move(program))) {}
 
-std::shared_ptr<Program> Model::getModelProgram() const { return program; }
+auto Model::getModelProgram() const -> std::shared_ptr<Program> { return program; }
 
-void Model::setProgram(std::shared_ptr<Program> prg) { program = prg; }
+void Model::setProgram(std::shared_ptr<Program> prg) { program = std::move(prg); }
 
 void Model::loadData(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material) {
     meshes.push_back(std::move(mesh));
@@ -34,7 +35,7 @@ void Model::draw() {
         if (material)
             material->bindMaterial(program);
 
-        glDrawElements(GL_TRIANGLES, mesh->getIndexSize(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, mesh->getIndexSize(), GL_UNSIGNED_INT, nullptr);
 
         glBindVertexArray(0);
     }

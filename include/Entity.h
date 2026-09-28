@@ -9,8 +9,8 @@
 namespace oriongl::core {
 
 struct Entity {
-  std::shared_ptr<graphics::Model> model;
-  std::vector<Transform> instances;
+    std::shared_ptr<graphics::Model> model;
+    std::vector<Transform> instances;
 };
 
 } // namespace oriongl::core

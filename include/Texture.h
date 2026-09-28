@@ -6,8 +6,8 @@ class Texture {
     unsigned int TEX = 0;
 
   public:
-    Texture(std::string texture);
-    Texture(std::string texture, bool flip);
+    Texture(const std::string &path);
+    Texture(const std::string &path, bool flip);
     ~Texture();
 
     Texture(const Texture &) = delete;
@@ -19,4 +19,3 @@ class Texture {
     unsigned int getTex() const;
 };
 } // namespace oriongl::graphics
-

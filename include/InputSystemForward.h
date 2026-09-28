@@ -1,8 +1,10 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <vector>
-#define MAX_KEY_BUFFER_SIZE 516
+
+constexpr const int maxKeyBufferSize = 516;
 
 namespace oriongl::core {
 
@@ -33,7 +35,7 @@ class KeyTranslationLayer {
     static KeyState getState(int state_code);
 };
 
-enum EventType { Mouse, Keyboard };
+enum EventType : uint8_t { Mouse, Keyboard };
 
 struct Event {
     EventType type;
@@ -41,7 +43,7 @@ struct Event {
     double second;
 };
 
-typedef std::vector<Event> EventBuffer;
+using EventBuffer = std::vector<Event>;
 
 enum Action : uint8_t {
     MoveForward,
@@ -58,11 +60,11 @@ enum Action : uint8_t {
 
 struct Command {
     Action action;
-    double value[2];
+    std::array<double, 2> value;
 };
 
-typedef std::vector<Command> CommandBuffer;
-typedef CommandBuffer DeferredBuffer;
+using CommandBuffer = std::vector<Command>;
+using DeferredBuffer = CommandBuffer;
 
 struct InputContext {
     EventBuffer events;

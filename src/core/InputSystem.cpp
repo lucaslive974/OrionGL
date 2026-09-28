@@ -1,4 +1,5 @@
 #include <InputSystem.h>
+#include <array>
 
 namespace {
 using Key = oriongl::core::Key;
@@ -14,11 +15,11 @@ struct CommandHelper {
     Command action;
 };
 
-CommandHelper command_helper[] = {
-    {Key::Escape, KeyState::Pressed, {Action::Quit}},       {Key::W, KeyState::Pressed, {Action::MoveForward}},
-    {Key::S, KeyState::Pressed, {Action::MoveBackward}},    {Key::A, KeyState::Pressed, {Action::MoveLeftward}},
-    {Key::D, KeyState::Pressed, {Action::MoveRightward}},   {Key::Space, KeyState::Pressed, {Action::MoveUpward}},
-    {Key::Ctrl, KeyState::Pressed, {Action::MoveDownward}},
+std::array<CommandHelper, 7> commandHelper = {
+    Key::Escape, KeyState::Pressed, {.action = Action::Quit},          Key::W,     KeyState::Pressed, {.action = Action::MoveForward},
+    Key::S,      KeyState::Pressed, {.action = Action::MoveBackward},  Key::A,     KeyState::Pressed, {.action = Action::MoveLeftward},
+    Key::D,      KeyState::Pressed, {.action = Action::MoveRightward}, Key::Space, KeyState::Pressed, {.action = Action::MoveUpward},
+    Key::Ctrl,   KeyState::Pressed, {.action = Action::MoveDownward},
 };
 
 } // namespace
@@ -34,7 +35,7 @@ void InputSystem::process() {
 void InputSystem::cleanup() { ctx.commands.clear(); }
 
 void InputSystem::updateCommandBuffer() {
-    for (auto &helper : command_helper) {
+    for (auto &helper : commandHelper) {
         if (key_states[helper.key] == helper.state)
             ctx.commands.push_back(helper.action);
     };
@@ -47,14 +48,14 @@ void InputSystem::updateKeyState() {
             KeyState state = KeyTranslationLayer::getState(event.second);
             key_states[key] = state;
         } else {
-            ctx.commands.push_back({Action::LookAt, {(float)event.first, (float)event.second}});
+            ctx.commands.push_back({.action = Action::LookAt, .value = {static_cast<float>(event.first), static_cast<float>(event.second)}});
         }
     }
 
     ctx.events.clear();
 }
 
-const CommandBuffer &getCommands() { return ctx.commands; };
-EventBuffer &getEvents() { return ctx.events; };
+auto getCommands() -> const CommandBuffer & { return ctx.commands; };
+auto getEvents() -> EventBuffer & { return ctx.events; };
 
 } // namespace oriongl::core

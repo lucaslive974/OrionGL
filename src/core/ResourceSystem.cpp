@@ -1,32 +1,32 @@
 #include <ModelLoader.h>
 #include <ResourceSystem.h>
 
-#include <assert.h>
+#include <cassert>
+
+#include <utility>
 
 namespace oriongl::core {
 
-std::shared_ptr<graphics::Program> ResourceSystem::createShader(std::string vertex_src, std::string frag_src,
-                                                                std::vector<std::string> defines) {
-    auto vertex_shader = createShaderStage(graphics::ShaderType::VERTEX, vertex_src, defines);
-    auto fragment_shader = createShaderStage(graphics::ShaderType::FRAGMENT, frag_src, defines);
+auto ResourceSystem::createShader(const std::string &vertex_src, const std::string &frag_src, const std::vector<std::string> &defines)
+    -> std::shared_ptr<graphics::Program> {
+    auto vertexShader = createShaderStage(graphics::ShaderType::VERTEX, vertex_src, defines);
+    auto fragmentShader = createShaderStage(graphics::ShaderType::FRAGMENT, frag_src, defines);
 
     auto key = program_manager.concatenateHashKeys(vertex_src, frag_src, defines);
-    return program_manager.createResource(key, std::move(vertex_shader), std::move(fragment_shader));
+    return program_manager.createResource(key, std::move(vertexShader), std::move(fragmentShader));
 };
 
-std::shared_ptr<graphics::Shader> ResourceSystem::createShaderStage(graphics::ShaderType type, std::string src,
-                                                                    std::vector<std::string> defines) {
-    return shader_manager.createResource(type, src, defines);
+auto ResourceSystem::createShaderStage(graphics::ShaderType type, std::string src, std::vector<std::string> defines)
+    -> std::shared_ptr<graphics::Shader> {
+    return shader_manager.createResource(type, std::move(src), std::move(defines));
 };
 
-std::shared_ptr<graphics::Texture> ResourceSystem::createTexture(std::string src) {
-    return texture_manager.createResource(src);
-};
+auto ResourceSystem::createTexture(std::string src) -> std::shared_ptr<graphics::Texture> { return texture_manager.createResource(std::move(src)); };
 
-std::shared_ptr<graphics::Material> ResourceSystem::createMaterial(std::vector<std::string> textures) {
+auto ResourceSystem::createMaterial(const std::vector<std::string> &textures) -> std::shared_ptr<graphics::Material> {
     auto material = std::make_shared<graphics::Material>();
 
-    for (auto &path : textures) {
+    for (const auto &path : textures) {
         auto texture = createTexture(path);
         material->loadTexture(texture);
     }
@@ -34,38 +34,36 @@ std::shared_ptr<graphics::Material> ResourceSystem::createMaterial(std::vector<s
     return material;
 };
 
-std::shared_ptr<graphics::Mesh> ResourceSystem::createCubeMesh(float side_size) {
-    auto cube_data = generateCubeMeshData(side_size);
+auto ResourceSystem::createCubeMesh(float side_size) -> std::shared_ptr<graphics::Mesh> {
+    auto cubeData = generateCubeMeshData(side_size);
     auto key = std::string("CUBE_MESH_KEY") + std::to_string(side_size);
 
-    return mesh_manager.createResource(key, cube_data.first, cube_data.second);
+    return mesh_manager.createResource(key, cubeData.first, cubeData.second);
 };
 
-std::shared_ptr<graphics::Mesh> ResourceSystem::createSphereMesh(float radius) {
-    auto sphere_data = generateSphereMeshData(radius);
+auto ResourceSystem::createSphereMesh(float radius) -> std::shared_ptr<graphics::Mesh> {
+    auto sphereData = generateSphereMeshData(radius);
     auto key = std::string("SPHERE_MESH_KEY") + std::to_string(radius);
 
-    return mesh_manager.createResource(key, sphere_data.first, sphere_data.second);
+    return mesh_manager.createResource(key, sphereData.first, sphereData.second);
 }
 
-std::shared_ptr<graphics::Mesh> ResourceSystem::createMesh(std::string key, graphics::vertex_array vertexes,
-                                                           graphics::indexes_array indexes) {
-    return mesh_manager.createResource(key, vertexes, indexes);
+auto ResourceSystem::createMesh(std::string key, graphics::vertex_array vertexes, graphics::indexes_array indexes)
+    -> std::shared_ptr<graphics::Mesh> {
+    return mesh_manager.createResource(std::move(key), std::move(vertexes), std::move(indexes));
 }
 
-std::shared_ptr<graphics::Model> ResourceSystem::createModel(std::string model_id,
-                                                             std::shared_ptr<graphics::Program> program,
-                                                             std::shared_ptr<graphics::Mesh> mesh,
-                                                             std::shared_ptr<graphics::Material> material) {
-    auto model = model_manager.createResource(model_id, program);
-    model->loadData(mesh, material);
+auto ResourceSystem::createModel(std::string model_id, std::shared_ptr<graphics::Program> program, std::shared_ptr<graphics::Mesh> mesh,
+                                 std::shared_ptr<graphics::Material> material) -> std::shared_ptr<graphics::Model> {
+    auto model = model_manager.createResource(std::move(model_id), std::move(program));
+    model->loadData(std::move(mesh), std::move(material));
 
     return model;
 }
 
-std::shared_ptr<graphics::Model> ResourceSystem::createModel(std::string model_id,
-                                                             std::shared_ptr<graphics::Program> program, std::string src) {
-    auto model = model_manager.createResource(model_id, program);
+auto ResourceSystem::createModel(const std::string &model_id, std::shared_ptr<graphics::Program> program, const std::string &src)
+    -> std::shared_ptr<graphics::Model> {
+    auto model = model_manager.createResource(model_id, std::move(program));
 
     auto [mesh_data, material_data] = ModelLoader::loadFromFile(src);
 
@@ -80,44 +78,44 @@ std::shared_ptr<graphics::Model> ResourceSystem::createModel(std::string model_i
     return model;
 };
 
-std::pair<graphics::vertex_array, graphics::indexes_array> ResourceSystem::generateCubeMeshData(float side_size) {
+auto ResourceSystem::generateCubeMeshData(float side_size) -> std::pair<graphics::vertex_array, graphics::indexes_array> {
     // clang-format off
     static graphics::vertex_array vertexesCube = {
         // ===== Front (+Z)
-        -side_size, -side_size,  side_size,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-         side_size, -side_size,  side_size,   0.0f, 0.0f, 1.0f,   1.0f, 0.0f,
-         side_size,  side_size,  side_size,   0.0f, 0.0f, 1.0f,   1.0f, 1.0f,
-        -side_size,  side_size,  side_size,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f,
+        -side_size, -side_size,  side_size,   0.0F, 0.0F, 1.0F,   0.0F, 0.0F,
+         side_size, -side_size,  side_size,   0.0F, 0.0F, 1.0F,   1.0F, 0.0F,
+         side_size,  side_size,  side_size,   0.0F, 0.0F, 1.0F,   1.0F, 1.0F,
+        -side_size,  side_size,  side_size,   0.0F, 0.0F, 1.0F,   0.0F, 1.0F,
 
         // ===== Back (-Z)
-         side_size, -side_size, -side_size,   0.0f, 0.0f,-1.0f,   0.0f, 0.0f,
-        -side_size, -side_size, -side_size,   0.0f, 0.0f,-1.0f,   1.0f, 0.0f,
-        -side_size,  side_size, -side_size,   0.0f, 0.0f,-1.0f,   1.0f, 1.0f,
-         side_size,  side_size, -side_size,   0.0f, 0.0f,-1.0f,   0.0f, 1.0f,
+         side_size, -side_size, -side_size,   0.0F, 0.0F,-1.0F,   0.0F, 0.0F,
+        -side_size, -side_size, -side_size,   0.0F, 0.0F,-1.0F,   1.0F, 0.0F,
+        -side_size,  side_size, -side_size,   0.0F, 0.0F,-1.0F,   1.0F, 1.0F,
+         side_size,  side_size, -side_size,   0.0F, 0.0F,-1.0F,   0.0F, 1.0F,
 
         // ===== Left (-X)
-        -side_size, -side_size, -side_size,  -1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
-        -side_size, -side_size,  side_size,  -1.0f, 0.0f, 0.0f,   1.0f, 0.0f,
-        -side_size,  side_size,  side_size,  -1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-        -side_size,  side_size, -side_size,  -1.0f, 0.0f, 0.0f,   0.0f, 1.0f,
+        -side_size, -side_size, -side_size,  -1.0F, 0.0F, 0.0F,   0.0F, 0.0F,
+        -side_size, -side_size,  side_size,  -1.0F, 0.0F, 0.0F,   1.0F, 0.0F,
+        -side_size,  side_size,  side_size,  -1.0F, 0.0F, 0.0F,   1.0F, 1.0F,
+        -side_size,  side_size, -side_size,  -1.0F, 0.0F, 0.0F,   0.0F, 1.0F,
 
         // ===== Right (+X)
-         side_size, -side_size,  side_size,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
-         side_size, -side_size, -side_size,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f,
-         side_size,  side_size, -side_size,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-         side_size,  side_size,  side_size,   1.0f, 0.0f, 0.0f,   0.0f, 1.0f,
+         side_size, -side_size,  side_size,   1.0F, 0.0F, 0.0F,   0.0F, 0.0F,
+         side_size, -side_size, -side_size,   1.0F, 0.0F, 0.0F,   1.0F, 0.0F,
+         side_size,  side_size, -side_size,   1.0F, 0.0F, 0.0F,   1.0F, 1.0F,
+         side_size,  side_size,  side_size,   1.0F, 0.0F, 0.0F,   0.0F, 1.0F,
 
         // ===== Top (+Y)
-        -side_size,  side_size,  side_size,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
-         side_size,  side_size,  side_size,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-         side_size,  side_size, -side_size,   0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
-        -side_size,  side_size, -side_size,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+        -side_size,  side_size,  side_size,   0.0F, 1.0F, 0.0F,   0.0F, 0.0F,
+         side_size,  side_size,  side_size,   0.0F, 1.0F, 0.0F,   1.0F, 0.0F,
+         side_size,  side_size, -side_size,   0.0F, 1.0F, 0.0F,   1.0F, 1.0F,
+        -side_size,  side_size, -side_size,   0.0F, 1.0F, 0.0F,   0.0F, 1.0F,
 
         // ===== Bottom (-Y)
-        -side_size, -side_size, -side_size,   0.0f,-1.0f, 0.0f,   0.0f, 0.0f,
-         side_size, -side_size, -side_size,   0.0f,-1.0f, 0.0f,   1.0f, 0.0f,
-         side_size, -side_size,  side_size,   0.0f,-1.0f, 0.0f,   1.0f, 1.0f,
-        -side_size, -side_size,  side_size,   0.0f,-1.0f, 0.0f,   0.0f, 1.0f
+        -side_size, -side_size, -side_size,   0.0F,-1.0F, 0.0F,   0.0F, 0.0F,
+         side_size, -side_size, -side_size,   0.0F,-1.0F, 0.0F,   1.0F, 0.0F,
+         side_size, -side_size,  side_size,   0.0F,-1.0F, 0.0F,   1.0F, 1.0F,
+        -side_size, -side_size,  side_size,   0.0F,-1.0F, 0.0F,   0.0F, 1.0F
     };
 
     static graphics::indexes_array indexesCube = {
@@ -133,7 +131,7 @@ std::pair<graphics::vertex_array, graphics::indexes_array> ResourceSystem::gener
     return std::make_pair(vertexesCube, indexesCube);
 }
 
-constexpr std::pair<graphics::vertex_array, graphics::indexes_array> ResourceSystem::generateSphereMeshData(float radius) {
+constexpr auto ResourceSystem::generateSphereMeshData(float radius) -> std::pair<graphics::vertex_array, graphics::indexes_array> {
     std::vector<float> vertexesSphere;
     std::vector<unsigned int> indexesSphere;
 
@@ -146,7 +144,7 @@ constexpr std::pair<graphics::vertex_array, graphics::indexes_array> ResourceSys
         float r = sinf(phi) * radius;
 
         for (int j = 0; j <= slices; ++j) {
-            float theta = (static_cast<float>(j) / slices) * 2.0f * M_PI;
+            float theta = (static_cast<float>(j) / slices) * 2.0F * M_PI;
             float x = r * cosf(theta);
             float z = r * sinf(theta);
 
@@ -161,8 +159,8 @@ constexpr std::pair<graphics::vertex_array, graphics::indexes_array> ResourceSys
             vertexesSphere.push_back(z);
 
             // coordenadas de textura
-            vertexesSphere.push_back(1.0f - (static_cast<float>(j) / slices));
-            vertexesSphere.push_back(1.0f - (static_cast<float>(i) / stacks));
+            vertexesSphere.push_back(1.0F - (static_cast<float>(j) / slices));
+            vertexesSphere.push_back(1.0F - (static_cast<float>(i) / stacks));
         }
     }
 

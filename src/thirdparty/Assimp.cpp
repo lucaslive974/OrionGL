@@ -4,7 +4,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <assert.h>
+#include <cassert>
 #include <filesystem>
 #include <span>
 #include <string>
@@ -18,26 +18,24 @@ class ModelLoaderImpl {
     std::filesystem::path model_root_path;
 
   public:
-    ModelLoaderImpl(std::string model_path) : model_path(model_path) {
-        model_root_path = std::filesystem::path(model_path).parent_path();
-    };
-    ModelData process();
+    ModelLoaderImpl(const std::string &model_path) : model_path(model_path) { model_root_path = std::filesystem::path(model_path).parent_path(); };
+    auto process() -> ModelData;
     void processNode(aiNode *node);
     void processMesh(unsigned int meshId);
-    graphics::vertex_array processVertex(aiMesh *mesh);
-    graphics::indexes_array processIndexes(aiMesh *mesh);
-    MaterialData processMaterial(unsigned int materialId);
-    inline std::string getRelativeModelTexturePath(aiString texture_path);
+    static auto processVertex(aiMesh *mesh) -> graphics::vertex_array;
+    static auto processIndexes(aiMesh *mesh) -> graphics::indexes_array;
+    auto processMaterial(unsigned int materialId) -> MaterialData;
+    inline auto getRelativeModelTexturePath(const aiString &texture_path) -> std::string;
 };
 
-ModelData ModelLoaderImpl::process() {
+auto ModelLoaderImpl::process() -> ModelData {
     Assimp::Importer importer;
 
     scene = importer.ReadFile(model_path, aiProcess_Triangulate | aiProcess_PreTransformVertices);
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::string error_msg{importer.GetErrorString()};
-        throw std::runtime_error("ERROR::ASSIMP::" + error_msg);
+    if ((scene == nullptr) || ((scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) != 0U) || (scene->mRootNode == nullptr)) {
+        std::string errorMsg{importer.GetErrorString()};
+        throw std::runtime_error("ERROR::ASSIMP::" + errorMsg);
     }
 
     processNode(scene->mRootNode);
@@ -61,72 +59,72 @@ void ModelLoaderImpl::processMesh(unsigned int meshId) {
     auto indexes = processIndexes(mesh);
     auto material = processMaterial(mesh->mMaterialIndex);
 
-    data.mesh_data.push_back(std::make_tuple(vertexes, indexes));
+    data.mesh_data.emplace_back(vertexes, indexes);
     data.material_data.push_back(material);
 };
 
-graphics::vertex_array ModelLoaderImpl::processVertex(aiMesh *mesh) {
+auto ModelLoaderImpl::processVertex(aiMesh *mesh) -> graphics::vertex_array {
     graphics::vertex_array vertexes;
 
     bool hasNormals = mesh->HasNormals();
     bool hasTextCoords = mesh->HasTextureCoords(0);
 
     for (size_t i = 0; i < mesh->mNumVertices; i++) {
-        aiVector3D &ai_vertexes = mesh->mVertices[i];
-        aiVector3D &ai_normals = mesh->mNormals[i];
-        aiVector3D &ai_text_coords = mesh->mTextureCoords[0][i];
+        aiVector3D &aiVertexes = mesh->mVertices[i];
+        aiVector3D &aiNormals = mesh->mNormals[i];
+        aiVector3D &aiTextCoords = mesh->mTextureCoords[0][i];
 
-        vertexes.insert(vertexes.end(), {ai_vertexes.x, ai_vertexes.y, ai_vertexes.z});
+        vertexes.insert(vertexes.end(), {aiVertexes.x, aiVertexes.y, aiVertexes.z});
 
         if (hasNormals)
-            vertexes.insert(vertexes.end(), {ai_normals.x, ai_normals.y, ai_normals.z});
+            vertexes.insert(vertexes.end(), {aiNormals.x, aiNormals.y, aiNormals.z});
         else
-            vertexes.insert(vertexes.end(), 3, 0.0f);
+            vertexes.insert(vertexes.end(), 3, 0.0F);
 
         if (hasTextCoords)
-            vertexes.insert(vertexes.end(), {ai_text_coords.x, ai_text_coords.y});
+            vertexes.insert(vertexes.end(), {aiTextCoords.x, aiTextCoords.y});
         else
-            vertexes.insert(vertexes.end(), 2, 0.0f);
+            vertexes.insert(vertexes.end(), 2, 0.0F);
     }
 
     return vertexes;
 }
 
-graphics::indexes_array ModelLoaderImpl::processIndexes(aiMesh *mesh) {
+auto ModelLoaderImpl::processIndexes(aiMesh *mesh) -> graphics::indexes_array {
     graphics::indexes_array indexes;
 
     for (size_t i = 0; i < mesh->mNumFaces; i++) {
         aiFace &face = mesh->mFaces[i];
-        auto indexes_span = std::span(face.mIndices, face.mNumIndices);
-        indexes.insert(indexes.end(), indexes_span.begin(), indexes_span.end());
+        auto indexesSpan = std::span(face.mIndices, face.mNumIndices);
+        indexes.insert(indexes.end(), indexesSpan.begin(), indexesSpan.end());
     }
 
     return indexes;
 }
 
-MaterialData ModelLoaderImpl::processMaterial(unsigned int materialId) {
+auto ModelLoaderImpl::processMaterial(unsigned int materialId) -> MaterialData {
     std::vector<std::string> textures;
 
     aiMaterial *material = scene->mMaterials[materialId];
-    unsigned int diffuse_cnt = material->GetTextureCount(aiTextureType_DIFFUSE);
-    unsigned int specular_cnt = material->GetTextureCount(aiTextureType_SPECULAR);
-    unsigned int emissive_cnt = material->GetTextureCount(aiTextureType_EMISSIVE);
+    unsigned int diffuseCnt = material->GetTextureCount(aiTextureType_DIFFUSE);
+    unsigned int specularCnt = material->GetTextureCount(aiTextureType_SPECULAR);
+    unsigned int emissiveCnt = material->GetTextureCount(aiTextureType_EMISSIVE);
 
-    if (diffuse_cnt) {
+    if (diffuseCnt != 0U) {
         aiString path;
         material->GetTexture(aiTextureType_DIFFUSE, 0, &path);
         if (!path.Empty())
             textures.push_back(getRelativeModelTexturePath(path));
     }
 
-    if (specular_cnt) {
+    if (specularCnt != 0U) {
         aiString path;
         material->GetTexture(aiTextureType_SPECULAR, 0, &path);
         if (!path.Empty())
             textures.push_back(getRelativeModelTexturePath(path));
     }
 
-    if (emissive_cnt) {
+    if (emissiveCnt != 0U) {
         aiString path;
         material->GetTexture(aiTextureType_EMISSIVE, 0, &path);
         if (!path.Empty())
@@ -136,13 +134,11 @@ MaterialData ModelLoaderImpl::processMaterial(unsigned int materialId) {
     return textures;
 };
 
-inline std::string ModelLoaderImpl::getRelativeModelTexturePath(aiString texture_path) {
-    return model_root_path / texture_path.data;
-};
+inline auto ModelLoaderImpl::getRelativeModelTexturePath(const aiString &texture_path) -> std::string { return model_root_path / texture_path.data; };
 
-ModelData ModelLoader::loadFromFile(std::string src) {
-    ModelLoaderImpl model_impl{src};
-    return model_impl.process();
+auto ModelLoader::loadFromFile(const std::string &src) -> ModelData {
+    ModelLoaderImpl modelImpl{src};
+    return modelImpl.process();
 };
 
 } // namespace oriongl::core

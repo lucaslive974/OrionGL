@@ -2,20 +2,20 @@
 
 namespace oriongl::core {
 
-bool Lighting::hasDirectional() const { return directional.has_value(); }
+auto Lighting::hasDirectional() const -> bool { return directional.has_value(); }
 
-graphics::DirectionalLight &Lighting::getDirectionalLight() { return directional.value(); };
+auto Lighting::getDirectionalLight() -> graphics::DirectionalLight & { return directional.value(); };
 
-std::vector<graphics::PointLight> &Lighting::getPointLights() { return points; };
+auto Lighting::getPointLights() -> std::vector<graphics::PointLight> & { return points; };
 
-graphics::LightScale &Lighting::getLightScaling() { return lightScale; };
+auto Lighting::getLightScaling() -> graphics::LightScale & { return lightScale; };
 
-size_t Lighting::addPointLight(graphics::PointLight light) {
+auto Lighting::addPointLight(graphics::PointLight light) -> size_t {
     points.push_back(light);
     return points.size() - 1;
 };
 
-size_t Lighting::addPointLight(glm::vec3 position, graphics::LightColor color) {
+auto Lighting::addPointLight(glm::vec3 position, graphics::LightColor color) -> size_t {
     graphics::PointLight light{position, color};
     points.push_back(light);
 

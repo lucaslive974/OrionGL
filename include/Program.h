@@ -9,11 +9,11 @@
 
 namespace oriongl::graphics {
 class Program {
-    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 model = glm::mat4(1.0F);
     unsigned int ID = 0;
 
   public:
-    Program(std::shared_ptr<Shader> vertex, std::shared_ptr<Shader> fragment);
+    Program(const std::shared_ptr<Shader> &vertex, const std::shared_ptr<Shader> &fragment);
     ~Program();
 
     Program(const Program &) = delete;
@@ -32,35 +32,37 @@ class Program {
 
     void setModelMatrix();
 
-    void setLights(core::Lighting &lights);
+    void setLights(core::Lighting &lights) const;
 
-    void setLightScale(graphics::LightScale &scaling);
+    void setLightScale(graphics::LightScale &scaling) const;
 
-    void setDirectionalLight(graphics::DirectionalLight &light);
+    void setDirectionalLight(graphics::DirectionalLight &light) const;
 
-    void setPointLights(std::vector<graphics::PointLight> &lights);
+    void setPointLights(std::vector<graphics::PointLight> &lights) const;
 
-    void setCamera(core::Camera &camera);
+    void setCamera(core::Camera &camera) const;
 
-    void setTextures();
+    void setTextures() const;
 
+    // NOLINTBEGIN
     void setUniform1I(const char name[], int value) const;
 
     void setUniform1UI(const char name[], int value) const;
 
     void setUniform1f(const char name[], float value) const;
 
-    void setUniform3fv(const char name[], glm::vec3 vec);
+    void setUniform3fv(const char name[], glm::vec3 vec) const;
 
-    void setUniform4fv(const char name[], glm::vec4 vec);
+    void setUniform4fv(const char name[], glm::vec4 vec) const;
 
-    void setUniform4fm(const char name[], glm::mat4 mat);
+    void setUniform4fm(const char name[], glm::mat4 mat) const;
 
-    void setUniform1i(const char name[], int value);
+    void setUniform1i(const char name[], int value) const;
+    // NOLINTEND
 
-    void use();
+    void use() const;
 
-    unsigned int getId();
+    [[nodiscard]] unsigned int getId() const;
 
     void errors();
 };

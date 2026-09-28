@@ -7,8 +7,7 @@
 namespace oriongl::core {
 class RenderSystem {
   public:
-    RenderSystem ();
-    void render(Scene &scene);
-  };
+    RenderSystem();
+    static void render(Scene &scene);
+};
 } // namespace oriongl::core
-

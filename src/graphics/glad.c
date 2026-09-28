@@ -94,12 +94,12 @@ int open_gl(void) {
         "/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL"
     };
 #else
-    static const char *NAMES[] = {"libGL.so.1", "libGL.so"};
+    static const char *names[] = {"libGL.so.1", "libGL.so"};
 #endif
 
     unsigned int index = 0;
-    for(index = 0; index < (sizeof(NAMES) / sizeof(NAMES[0])); index++) {
-        libGL = dlopen(NAMES[index], RTLD_NOW | RTLD_GLOBAL);
+    for (index = 0; index < (sizeof(names) / sizeof(names[0])); index++) {
+        libGL = dlopen(names[index], RTLD_NOW | RTLD_GLOBAL);
 
         if(libGL != NULL) {
 #if defined(__APPLE__) || defined(__HAIKU__)
@@ -159,44 +159,44 @@ int gladLoadGL(void) {
 struct gladGLversionStruct GLVersion = { 0, 0 };
 
 #if defined(GL_ES_VERSION_3_0) || defined(GL_VERSION_3_0)
-#define _GLAD_IS_SOME_NEW_VERSION 1
+#define GLAD_IS_SOME_NEW_VERSION 1
 #endif
 
-static int max_loaded_major;
-static int max_loaded_minor;
+static int maxLoadedMajor;
+static int maxLoadedMinor;
 
 static const char *exts = NULL;
-static int num_exts_i = 0;
-static char **exts_i = NULL;
+static int numExtsI = 0;
+static char **extsI = NULL;
 
 static int get_exts(void) {
 #ifdef _GLAD_IS_SOME_NEW_VERSION
-    if(max_loaded_major < 3) {
+    if (maxLoadedMajor < 3) {
 #endif
         exts = (const char *)glGetString(GL_EXTENSIONS);
 #ifdef _GLAD_IS_SOME_NEW_VERSION
     } else {
         int index;
 
-        num_exts_i = 0;
-        glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts_i);
-        if (num_exts_i > 0) {
-            exts_i = (char **)malloc((size_t)num_exts_i * (sizeof *exts_i));
+        numExtsI = 0;
+        glGetIntegerv(GL_NUM_EXTENSIONS, &numExtsI);
+        if (numExtsI > 0) {
+            extsI = (char **)malloc((size_t)numExtsI * (sizeof *extsI));
         }
 
-        if (exts_i == NULL) {
+        if (extsI == NULL) {
             return 0;
         }
 
-        for(index = 0; index < num_exts_i; index++) {
-            const char *gl_str_tmp = (const char*)glGetStringi(GL_EXTENSIONS, index);
-            size_t len = strlen(gl_str_tmp);
+        for (index = 0; index < numExtsI; index++) {
+            const char *glStrTmp = (const char *)glGetStringi(GL_EXTENSIONS, index);
+            size_t len = strlen(glStrTmp);
 
-            char *local_str = (char*)malloc((len+1) * sizeof(char));
-            if(local_str != NULL) {
-                memcpy(local_str, gl_str_tmp, (len+1) * sizeof(char));
+            char *localStr = (char *)malloc((len + 1) * sizeof(char));
+            if (localStr != NULL) {
+                memcpy(localStr, glStrTmp, (len + 1) * sizeof(char));
             }
-            exts_i[index] = local_str;
+            extsI[index] = localStr;
         }
     }
 #endif
@@ -204,19 +204,19 @@ static int get_exts(void) {
 }
 
 static void free_exts(void) {
-    if (exts_i != NULL) {
+    if (extsI != NULL) {
         int index;
-        for(index = 0; index < num_exts_i; index++) {
-            free((char *)exts_i[index]);
+        for (index = 0; index < numExtsI; index++) {
+            free((char *)extsI[index]);
         }
-        free((void *)exts_i);
-        exts_i = NULL;
+        free((void *)extsI);
+        extsI = NULL;
     }
 }
 
 static int has_ext(const char *ext) {
 #ifdef _GLAD_IS_SOME_NEW_VERSION
-    if(max_loaded_major < 3) {
+    if (maxLoadedMajor < 3) {
 #endif
         const char *extensions;
         const char *loc;
@@ -242,11 +242,12 @@ static int has_ext(const char *ext) {
 #ifdef _GLAD_IS_SOME_NEW_VERSION
     } else {
         int index;
-        if(exts_i == NULL) return 0;
-        for(index = 0; index < num_exts_i; index++) {
-            const char *e = exts_i[index];
+        if (extsI == NULL)
+            return 0;
+        for (index = 0; index < numExtsI; index++) {
+            const char *e = extsI[index];
 
-            if(exts_i[index] != NULL && strcmp(e, ext) == 0) {
+            if (extsI[index] != NULL && strcmp(e, ext) == 0) {
                 return 1;
             }
         }
@@ -1067,7 +1068,9 @@ static void find_coreGL(void) {
      * https://github.com/elmindreda/greg/blob/master/templates/greg.c.in#L176
      * https://github.com/glfw/glfw/blob/master/src/context.c#L36
      */
-    int i, major, minor;
+    int i;
+    int major;
+    int minor;
 
     const char* version;
     const char* prefixes[] = {
@@ -1096,23 +1099,24 @@ static void find_coreGL(void) {
 #endif
 
     GLVersion.major = major; GLVersion.minor = minor;
-    max_loaded_major = major; max_loaded_minor = minor;
-	GLAD_GL_VERSION_1_0 = (major == 1 && minor >= 0) || major > 1;
-	GLAD_GL_VERSION_1_1 = (major == 1 && minor >= 1) || major > 1;
-	GLAD_GL_VERSION_1_2 = (major == 1 && minor >= 2) || major > 1;
-	GLAD_GL_VERSION_1_3 = (major == 1 && minor >= 3) || major > 1;
-	GLAD_GL_VERSION_1_4 = (major == 1 && minor >= 4) || major > 1;
-	GLAD_GL_VERSION_1_5 = (major == 1 && minor >= 5) || major > 1;
-	GLAD_GL_VERSION_2_0 = (major == 2 && minor >= 0) || major > 2;
-	GLAD_GL_VERSION_2_1 = (major == 2 && minor >= 1) || major > 2;
-	GLAD_GL_VERSION_3_0 = (major == 3 && minor >= 0) || major > 3;
-	GLAD_GL_VERSION_3_1 = (major == 3 && minor >= 1) || major > 3;
-	GLAD_GL_VERSION_3_2 = (major == 3 && minor >= 2) || major > 3;
-	GLAD_GL_VERSION_3_3 = (major == 3 && minor >= 3) || major > 3;
-	if (GLVersion.major > 3 || (GLVersion.major >= 3 && GLVersion.minor >= 3)) {
-		max_loaded_major = 3;
-		max_loaded_minor = 3;
-	}
+    maxLoadedMajor = major;
+    maxLoadedMinor = minor;
+    GLAD_GL_VERSION_1_0 = (major == 1 && minor >= 0) || major > 1;
+    GLAD_GL_VERSION_1_1 = (major == 1 && minor >= 1) || major > 1;
+    GLAD_GL_VERSION_1_2 = (major == 1 && minor >= 2) || major > 1;
+    GLAD_GL_VERSION_1_3 = (major == 1 && minor >= 3) || major > 1;
+    GLAD_GL_VERSION_1_4 = (major == 1 && minor >= 4) || major > 1;
+    GLAD_GL_VERSION_1_5 = (major == 1 && minor >= 5) || major > 1;
+    GLAD_GL_VERSION_2_0 = (major == 2 && minor >= 0) || major > 2;
+    GLAD_GL_VERSION_2_1 = (major == 2 && minor >= 1) || major > 2;
+    GLAD_GL_VERSION_3_0 = (major == 3 && minor >= 0) || major > 3;
+    GLAD_GL_VERSION_3_1 = (major == 3 && minor >= 1) || major > 3;
+    GLAD_GL_VERSION_3_2 = (major == 3 && minor >= 2) || major > 3;
+    GLAD_GL_VERSION_3_3 = (major == 3 && minor >= 3) || major > 3;
+    if (GLVersion.major > 3 || (GLVersion.major >= 3 && GLVersion.minor >= 3)) {
+        maxLoadedMajor = 3;
+        maxLoadedMinor = 3;
+    }
 }
 
 int gladLoadGLLoader(GLADloadproc load) {

@@ -1,12 +1,12 @@
 #include "Shader.h"
-#include "Utils.h"
-#include <format>
+#include <array>
 #include <glad.h>
 #include <sstream>
+#include <utility>
 
 namespace oriongl::graphics {
 Shader::Shader(ShaderType type, std::string src_raw, const std::vector<std::string> &defines)
-    : ID(glCreateShader(type)), shaderSource(src_raw), shaderType(type), defines(defines) {
+    : ID(glCreateShader(type)), shaderSource(std::move(std::move(src_raw))), shaderType(type), defines(defines) {
     injectDefines();
     compileShader();
     getErrors();
@@ -14,20 +14,20 @@ Shader::Shader(ShaderType type, std::string src_raw, const std::vector<std::stri
 
 void Shader::injectDefines() {
     std::stringstream ss;
-    const size_t first_break_line = shaderSource.find_first_of("\n");
-    ss << shaderSource.substr(0, first_break_line);
+    const size_t firstBreakLine = shaderSource.find_first_of('\n');
+    ss << shaderSource.substr(0, firstBreakLine);
     for (auto &define : defines) {
         ss << "\n#define " << define;
     }
     ss << "\n";
-    ss << shaderSource.substr(first_break_line);
+    ss << shaderSource.substr(firstBreakLine);
 
     shaderSource = ss.str();
 }
 
 void Shader::compileShader() const {
     const char *raw = shaderSource.c_str();
-    glShaderSource(ID, 1, &raw, 0);
+    glShaderSource(ID, 1, &raw, nullptr);
     glCompileShader(ID);
 }
 
@@ -39,14 +39,11 @@ Shader::~Shader() {
 }
 
 Shader::Shader(Shader &&other) noexcept
-    : shaderSource(std::move(other.shaderSource)),
-      defines(std::move(other.defines)),
-      shaderType(other.shaderType),
-      ID(other.ID) {
+    : shaderSource(std::move(other.shaderSource)), defines(std::move(other.defines)), shaderType(other.shaderType), ID(other.ID) {
     other.ID = 0;
 }
 
-Shader &Shader::operator=(Shader &&other) noexcept {
+auto Shader::operator=(Shader &&other) noexcept -> Shader & {
     if (this != &other) {
         if (this->ID != 0) {
             glDeleteShader(this->ID);
@@ -60,22 +57,22 @@ Shader &Shader::operator=(Shader &&other) noexcept {
     return *this;
 }
 
-std::string Shader::getSource() { return shaderSource; }
+auto Shader::getSource() -> std::string { return shaderSource; }
 
 void Shader::getErrors() {
     int success = 0;
-    char infoLog[512];
+    std::array<char, 512> infoLog;
 
     glGetShaderiv(ID, GL_COMPILE_STATUS, &success);
 
-    if (!success) {
-        glGetShaderInfoLog(ID, 512, NULL, infoLog);
+    if (success == 0) {
+        glGetShaderInfoLog(ID, 512, nullptr, infoLog.data());
         glDeleteShader(ID);
         ID = 0;
-        throw std::runtime_error{infoLog};
+        throw std::runtime_error{infoLog.data()};
     }
 }
 
-GLuint Shader::getId() const { return ID; }
+auto Shader::getId() const -> GLuint { return ID; }
 
 } // namespace oriongl::graphics

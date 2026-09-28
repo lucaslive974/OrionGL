@@ -7,19 +7,19 @@
 
 namespace oriongl::core {
 class WindowSystem {
-private:
-  class WindowSystemImpl;
-  std::unique_ptr<WindowSystemImpl> impl;
+  private:
+    class WindowSystemImpl;
+    std::unique_ptr<WindowSystemImpl> impl;
 
-public:
-  WindowSystem();
-  ~WindowSystem();
+  public:
+    WindowSystem();
+    ~WindowSystem();
 
-  void setTitle(const char *title);
-  void swapBuffers();
-  void closeWindow();
+    void setTitle(const char *title);
+    void swapBuffers();
+    static void closeWindow();
 
-  float getDeltaTime() const;
-  float getTotalTime() const;
+    [[nodiscard]] float getDeltaTime() const;
+    static auto getTotalTime() -> float;
 };
 } // namespace oriongl::core

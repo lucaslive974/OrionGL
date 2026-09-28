@@ -7,7 +7,7 @@
 namespace oriongl::core {
 
 class InputSystem {
-    std::array<KeyState, MAX_KEY_BUFFER_SIZE> key_states;
+    std::array<KeyState, maxKeyBufferSize> key_states;
 
     void updateKeyState();
     void updateCommandBuffer();
@@ -15,6 +15,6 @@ class InputSystem {
   public:
     InputSystem();
     void process();
-    void cleanup();
+    static void cleanup();
 };
 } // namespace oriongl::core

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -8,7 +9,7 @@ namespace oriongl::graphics {
 #define VERTEX_SHADER 0x8b31
 #define FRAGMENT_SHADER 0x8b30
 
-enum ShaderType {
+enum ShaderType : uint16_t {
     VERTEX = VERTEX_SHADER,
     FRAGMENT = FRAGMENT_SHADER,
 };

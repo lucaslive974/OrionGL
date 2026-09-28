@@ -10,36 +10,35 @@
 
 namespace oriongl::graphics {
 
-typedef std::array<float, 3> LightColor;
+using LightColor = std::array<float, 3>;
 
 struct LightScale {
-    float ambient = 0.05f;
-    float diffuse = 0.8f;
-    float specular = 1.0f;
+    float ambient = 0.05F;
+    float diffuse = 0.8F;
+    float specular = 1.0F;
 };
 
 struct LightAttenuation {
-    float constant = 1.0f;
-    float linear = 0.0014f;
-    float quadratic = 0.000007f;
+    float constant = 1.0F;
+    float linear = 0.0014F;
+    float quadratic = 0.000007F;
 };
 
 struct Light {
-    std::array<float, 3> _color{1.0f, 1.0f, 1.0f};
+    std::array<float, 3> _color{1.0F, 1.0F, 1.0F};
 };
 
 struct DirectionalLight : Light {
-    glm::vec3 _direction{0.0f, 0.0f, 0.0f};
+    glm::vec3 _direction{0.0F, 0.0F, 0.0F};
 
-    DirectionalLight(glm::vec3 dir, LightColor color = {1.0f, 1.0f, 1.0f}) : _direction(dir), Light(color) {};
+    DirectionalLight(glm::vec3 dir, LightColor color = {1.0F, 1.0F, 1.0F}) : _direction(dir), Light(color) {};
 };
 
 struct PointLight : Light {
     glm::vec3 _position;
     LightAttenuation _attenuation;
 
-    PointLight(glm::vec3 pos, LightColor color, LightAttenuation att = LightAttenuation{})
-        : _position(pos), _attenuation(att), Light(color) {};
+    PointLight(glm::vec3 pos, LightColor color, LightAttenuation att = LightAttenuation{}) : _position(pos), _attenuation(att), Light(color) {};
 };
 
 struct SpotLight : Light {
@@ -61,8 +60,7 @@ class Lighting {
     Lighting() = default;
     Lighting(std::vector<graphics::PointLight> &lights) : points(lights) {};
     Lighting(graphics::DirectionalLight dir_light) : directional(dir_light) {};
-    Lighting(graphics::DirectionalLight dir_light, std::vector<graphics::PointLight> &lights)
-        : directional(dir_light), points(lights) {};
+    Lighting(graphics::DirectionalLight dir_light, std::vector<graphics::PointLight> &lights) : directional(dir_light), points(lights) {};
 
     bool hasDirectional() const;
     void setDirectional(glm::vec3 light);

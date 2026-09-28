@@ -3,43 +3,43 @@
 namespace oriongl {
 
 void Engine::run() {
-  status = ENGINE_RUNNING;
-  while (status == ENGINE_RUNNING) {
-    float dt = windowSystem.getDeltaTime();
-    float totalTime = windowSystem.getTotalTime();
+    status = ENGINE_RUNNING;
+    while (status == ENGINE_RUNNING) {
+        float dt = windowSystem.getDeltaTime();
+        float totalTime = oriongl::core::WindowSystem::getTotalTime();
 
-    inputSystem.process();
-    scene.camera.processCommands(dt);
+        inputSystem.process();
+        scene.camera.processCommands(dt);
 
-    if (onUpdate) {
-      onUpdate(scene, dt, totalTime);
+        if (onUpdate) {
+            onUpdate(scene, dt, totalTime);
+        }
+
+        oriongl::core::RenderSystem::render(scene);
+        windowSystem.swapBuffers();
+
+        processCommands();
+        oriongl::core::InputSystem::cleanup();
     }
 
-    renderSystem.render(scene);
-    windowSystem.swapBuffers();
-
-    processCommands();
-    inputSystem.cleanup();
-  }
-
-  windowSystem.closeWindow();
+    oriongl::core::WindowSystem::closeWindow();
 }
 
 void Engine::processCommands() {
-  auto command_buffer = core::getCommands();
+    auto commandBuffer = core::getCommands();
 
-  for (auto &command : command_buffer) {
-    if (command.action == core::Action::Quit) {
-      status = ENGINE_CLOSING;
-      break;
+    for (auto &command : commandBuffer) {
+        if (command.action == core::Action::Quit) {
+            status = ENGINE_CLOSING;
+            break;
+        }
     }
-  }
 }
 
 void Engine::setScene(core::Scene &sc) { scene = sc; }
 
 void Engine::setUpdateCallback(UpdateCallback cb) { onUpdate = std::move(cb); }
 
-core::WindowSystem &Engine::getWindowSystem() { return windowSystem; }
+auto Engine::getWindowSystem() -> core::WindowSystem & { return windowSystem; }
 
 } // namespace oriongl
